@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file:///android/AndroidStudioProjects/ToDoList/ToDoList.iml" filepath="/android/AndroidStudioProjects/ToDoList/ToDoList.iml" />
+      <module fileurl="file:///android/AndroidStudioProjects/ToDoList/app/app.iml" filepath="/android/AndroidStudioProjects/ToDoList/app/app.iml" />
+    </modules>
+  </component>
+</project>
