@@ -7,44 +7,39 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
-
 import java.io.PrintWriter;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+
 public class MainActivity extends AppCompatActivity {
 
-    private ArrayList<String> taskListArray;
-    private ArrayAdapter<String> taskListAdapter;
-
-
+    private ArrayList<TaskObject> taskListArray = new ArrayList<TaskObject>();
+    private TaskObject taskObject;
+    private ListView listView;
+    private CustomAdapter customAdapter;
+    public EditText Item;
+    public EditText Description;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        taskListArray = new ArrayList<String>();
-        taskListAdapter = new ArrayAdapter<String>(this, R.layout.custom_layout, taskListArray);
-        final ListView taskListView = (ListView) findViewById(R.id.taskListView);
-        taskListView.setAdapter(taskListAdapter);
+        customAdapter = new CustomAdapter(this, taskListArray);
+        listView = (ListView) findViewById(R.id.taskListView);
+        listView.setAdapter(customAdapter);
 
-
-        taskListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+        listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
-                if(taskListArray.size() > 0) {
-                    taskListAdapter.remove(taskListView.getItemAtPosition(i).toString());
-                    saveList();
-                    Toast.makeText(getApplicationContext(), "Task Removed",Toast.LENGTH_LONG).show();
-                }
-                return false;
+                customAdapter.remove(customAdapter.getItem(i));
+                saveList();
+                Toast.makeText(getApplicationContext(), "Task Removed",Toast.LENGTH_LONG).show();
+                return true;
             }
         });
 
@@ -54,25 +49,26 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void addButtonClick(View view) {
-        EditText Item = (EditText) findViewById(R.id.addTask);
-        EditText Description = (EditText) findViewById(R.id.addDescription);
+        Item = (EditText) findViewById(R.id.addTask);
+        Description = (EditText) findViewById(R.id.addDescription);
 
         String toDoItem = (Item).getText().toString().trim();
         String toDoDescription = (Description).getText().toString().trim();
 
-        String task = toDoItem + "\n" + toDoDescription;
-
-
-        if (toDoItem.isEmpty()) {
+        if(toDoItem.length() == 0 || toDoDescription.length() == 0){
+            Toast.makeText(getApplicationContext(), "Please enter a task AND a description",Toast.LENGTH_LONG).show();
             return;
         }
 
-
-        taskListAdapter.add(task);
+        TaskObject newTask = new TaskObject();
+        newTask.setTitle(toDoItem);
+        newTask.setDescription(toDoDescription);
+        customAdapter.add(newTask);
 
         Item.setText("");
         Description.setText("");
         saveList();
+
         Toast.makeText(getApplicationContext(), "Task Added",Toast.LENGTH_LONG).show();
 
     }
@@ -82,9 +78,8 @@ public class MainActivity extends AppCompatActivity {
         try {
             PrintWriter pw = new PrintWriter(openFileOutput("ToDoList.txt", Context.MODE_PRIVATE));
 
-            for (String toDo : taskListArray) {
-                Log.i("SAVING LIST", toDo);
-                pw.println(toDo);
+            for (TaskObject task : taskListArray) {
+                pw.println(task.getTitle() + " " + task.getDescription());
             }
 
             pw.close();
@@ -102,8 +97,12 @@ public class MainActivity extends AppCompatActivity {
 
             while(scanner.hasNextLine()){
                 String toDo = scanner.nextLine();
+                String[] toDoArray = toDo.split("\\s+");
+                TaskObject task = new TaskObject();
+                task.setTitle(toDoArray[0]);
+                task.setDescription(toDoArray[1]);
                 if(toDo.length() > 0) {
-                    taskListAdapter.add(toDo);
+                    customAdapter.add(task);
                 }
             }
 
@@ -112,5 +111,4 @@ public class MainActivity extends AppCompatActivity {
         }
 
     }
-
 }
